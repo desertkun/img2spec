@@ -844,7 +844,8 @@ int main(int aParamc, char**aParams)
 
 	gDevice = new ZXSpectrumDevice;
 	// Setup SDL
-	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
+	if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS | \
+            SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER) != 0)
 	{
         printf("Error: %s\n", SDL_GetError());
         return -1;
@@ -916,6 +917,7 @@ int main(int aParamc, char**aParams)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	bool done = false;
+	bool loadedimage = false;
 
 	int commandline_export = 0;	
 	int commandline_export_fn = 0;
@@ -939,9 +941,15 @@ int main(int aParamc, char**aParams)
 			}
 			else
 			{
-				// image or workspace. Just try both!
-				loadimg(aParams[i]);
-				loadworkspace(aParams[i]);
+				if (loadedimage)
+                {
+                    loadworkspace(aParams[i]);
+                }
+				else
+                {
+                    loadimg(aParams[i]);
+                    loadedimage = true;
+                }
 			}
 		}
 	}

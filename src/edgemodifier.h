@@ -189,21 +189,21 @@ public:
 			{
 				for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 				{
-					if (mB_en && ((abs(xedge[i * 3 + 0]) + abs(yedge[i * 3 + 0])) > mThreshold))
+					if (mB_en && ((labs((float)xedge[i * 3 + 0]) + labs(yedge[i * 3 + 0])) > mThreshold))
 					{
-						float p = abs(yedge[i * 3 + 0]) + abs(xedge[i * 3 + 0]) - mThreshold;
+						float p = labs(yedge[i * 3 + 0]) + labs(xedge[i * 3 + 0]) - mThreshold;
 						if (p > 1) p = 1;
 						gBitmapProcFloat[i * 3 + 0] += (mFillColor[0] - gBitmapProcFloat[i * 3 + 0]) * mV * p;
 					}
-					if (mG_en && ((abs(xedge[i * 3 + 1]) + abs(yedge[i * 3 + 1])) > mThreshold))
+					if (mG_en && ((labs(xedge[i * 3 + 1]) + labs(yedge[i * 3 + 1])) > mThreshold))
 					{
-						float p = abs(yedge[i * 3 + 1]) + abs(xedge[i * 3 + 1]) - mThreshold;
+						float p = labs(yedge[i * 3 + 1]) + labs(xedge[i * 3 + 1]) - mThreshold;
 						if (p > 1) p = 1;
 						gBitmapProcFloat[i * 3 + 1] += (mFillColor[1] - gBitmapProcFloat[i * 3 + 1]) * mV * p;
 					}
-					if (mR_en && ((abs(xedge[i * 3 + 2]) + abs(yedge[i * 3 + 2])) > mThreshold))
+					if (mR_en && ((labs(xedge[i * 3 + 2]) + labs(yedge[i * 3 + 2])) > mThreshold))
 					{
-						float p = abs(yedge[i * 3 + 2]) + abs(xedge[i * 3 + 2]) - mThreshold;
+						float p = labs(yedge[i * 3 + 2]) + labs(xedge[i * 3 + 2]) - mThreshold;
 						if (p > 1) p = 1;
 						gBitmapProcFloat[i * 3 + 2] += (mFillColor[2] - gBitmapProcFloat[i * 3 + 2]) * mV * p;
 					}
@@ -228,9 +228,9 @@ public:
 			{
 				for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
 				{
-					if (mB_en && (abs(xedge[i * 3 + 0]) > mThreshold || abs(yedge[i * 3 + 0]) > mThreshold)) gBitmapProcFloat[i * 3 + 0] += (mFillColor[0] - gBitmapProcFloat[i * 3 + 0]) * mV;
-					if (mG_en && (abs(xedge[i * 3 + 1]) > mThreshold || abs(yedge[i * 3 + 1]) > mThreshold)) gBitmapProcFloat[i * 3 + 1] += (mFillColor[1] - gBitmapProcFloat[i * 3 + 1]) * mV;
-					if (mR_en && (abs(xedge[i * 3 + 2]) > mThreshold || abs(yedge[i * 3 + 2]) > mThreshold)) gBitmapProcFloat[i * 3 + 2] += (mFillColor[2] - gBitmapProcFloat[i * 3 + 2]) * mV;
+					if (mB_en && (labs(xedge[i * 3 + 0]) > mThreshold || labs(yedge[i * 3 + 0]) > mThreshold)) gBitmapProcFloat[i * 3 + 0] += (mFillColor[0] - gBitmapProcFloat[i * 3 + 0]) * mV;
+					if (mG_en && (labs(xedge[i * 3 + 1]) > mThreshold || labs(yedge[i * 3 + 1]) > mThreshold)) gBitmapProcFloat[i * 3 + 1] += (mFillColor[1] - gBitmapProcFloat[i * 3 + 1]) * mV;
+					if (mR_en && (labs(xedge[i * 3 + 2]) > mThreshold || labs(yedge[i * 3 + 2]) > mThreshold)) gBitmapProcFloat[i * 3 + 2] += (mFillColor[2] - gBitmapProcFloat[i * 3 + 2]) * mV;
 				}
 			}
 		}
