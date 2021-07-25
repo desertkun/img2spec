@@ -1,6 +1,8 @@
 
 #include <cstdio>
 #include <cstring>
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 #include "parson/parson.h"
 
