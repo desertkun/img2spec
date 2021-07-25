@@ -11,7 +11,7 @@ public:
 	{
 		mOptTileType = 0;
 	}
-
+#ifdef WITH_GUI
 	virtual void options()
 	{
 		if (ImGui::Combo("Wide or tall tiles", &mOptTileType, "Tall (64x24)\0Wide (32x48)\0")) { gDirty = 1; gDirtyPic = 1; }
@@ -21,6 +21,7 @@ public:
 		if (ImGui::SliderInt("Bitmap height in cells", &mOptHeightCells, 1, 512 / (8 >> mOptCellSize))) { gDirty = 1; gDirtyPic = 1; mYRes = mOptHeightCells * (8 >> mOptCellSize); }
 		ImGui::Combo("Bitmap order when saving", &mOptScreenOrder, "Linear order\0Spectrum video RAM order\0");
 	}
+#endif
 
 	virtual void writeOptions(JSON_Object *root)
 	{
@@ -48,9 +49,10 @@ public:
 #undef READCONFIG
 		mXRes = mOptWidthCells * 8;
 		mYRes = mOptHeightCells * (8 >> mOptCellSize);
-
+#ifdef WITH_GUI
 		gDirty = 1;
 		gDirtyPic = 1;
+#endif
 	}
 
 
@@ -64,7 +66,7 @@ public:
 		int x, y, i, j;
 
 		// Find closest colors in the speccy palette
-		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
+		for (i = 0; i < mXRes * mYRes; i++)
 		{
 			gBitmapSpec[i] = rgb_to_speccy_pal(gBitmapProc[i], 0, 16);
 		}
@@ -87,11 +89,11 @@ public:
 			cellht = 1;
 			break;
 		}
-		ymax = gDevice->mYRes / cellht;
+		ymax = mYRes / cellht;
 
 		for (y = 0; y < ymax; y++)
 		{
-			for (x = 0; x < (gDevice->mXRes / 8); x++)
+			for (x = 0; x < (mXRes / 8); x++)
 			{
 				// Count bright pixels in cell
 				int brights = 0;
@@ -100,7 +102,7 @@ public:
 				{
 					for (j = 0; j < 8; j++)
 					{
-						int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
+						int loc = (y * cellht + i) * mXRes + x * 8 + j;
 						if (gBitmapSpec[loc] > 7)
 							brights++;
 						if (gBitmapSpec[loc] == 0)
@@ -129,7 +131,7 @@ public:
 				{
 					for (j = 0; j < 8; j++)
 					{
-						int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
+						int loc = (y * cellht + i) * mXRes + x * 8 + j;
 						int r = rgb_to_speccy_pal(gBitmapProc[loc], brights, 8);
 						gBitmapSpec[loc] = r;
 						if (mOptTileType == 0)
@@ -187,7 +189,7 @@ public:
 				{
 					for (j = 0; j < 8; j++)
 					{
-						int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
+						int loc = (y * cellht + i) * mXRes + x * 8 + j;
 						int bit = 0;
 						if (mOptTileType == 0)
 						{
@@ -198,20 +200,20 @@ public:
 							bit = i < (cellht / 2);
 						}
 						gBitmapSpec[loc] = bit ? col1 : col2;
-						mSpectrumBitmap[SPEC_Y(y * cellht + i) * (gDevice->mXRes / 8) + x] <<= 1;
-						mSpectrumBitmap[SPEC_Y(y * cellht + i) * (gDevice->mXRes / 8) + x] |= bit;
-						mSpectrumBitmapLinear[(y * cellht + i) * (gDevice->mXRes / 8) + x] <<= 1;
-						mSpectrumBitmapLinear[(y * cellht + i) * (gDevice->mXRes / 8) + x] |= bit;
+						mSpectrumBitmap[SPEC_Y(y * cellht + i) * (mXRes / 8) + x] <<= 1;
+						mSpectrumBitmap[SPEC_Y(y * cellht + i) * (mXRes / 8) + x] |= bit;
+						mSpectrumBitmapLinear[(y * cellht + i) * (mXRes / 8) + x] <<= 1;
+						mSpectrumBitmapLinear[(y * cellht + i) * (mXRes / 8) + x] |= bit;
 					}
 				}
 
 				// Store the cell's attribute
-				mSpectrumAttributes[y * (gDevice->mXRes / 8) + x] = (col2 & 0x7) | ((col1 & 7) << 3) | (((col1 & 8) != 0) << 6);
+				mSpectrumAttributes[y * (mXRes / 8) + x] = (col2 & 0x7) | ((col1 & 7) << 3) | (((col1 & 8) != 0) << 6);
 			}
 		}
 
 		// Map color indices to palette
-		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
+		for (i = 0; i < mXRes * mYRes; i++)
 		{
 			gBitmapSpec[i] = gSpeccyPalette[gBitmapSpec[i]] | 0xff000000;
 		}

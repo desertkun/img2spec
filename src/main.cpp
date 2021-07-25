@@ -28,6 +28,8 @@ Still, if you find it useful, great!
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#define WITH_GUI (1)
+
 #include "platform/common.h"
 
 #include "imgui.h"
@@ -61,8 +63,10 @@ unsigned int *gSourceImageData = 0;
 int gSourceImageX = 0, gSourceImageY = 0;
 int gSourceImageDate = 0;
 
+class Device;
+
 int float_to_color(float aR, float aG, float aB);
-void bitmap_to_float(unsigned int *aBitmap);
+void bitmap_to_float(unsigned int *aBitmap, Device *gDevice);
 void update_texture(GLuint aTexture, unsigned int *aBitmap);
 
 // Do we need to recalculate?
@@ -178,7 +182,7 @@ void update_texture(GLuint aTexture, unsigned int *aBitmap)
 		(GLvoid*)aBitmap);		// data
 }
 
-void bitmap_to_float(unsigned int *aBitmap)
+void bitmap_to_float(unsigned int *aBitmap, Device *gDevice)
 {
 	int i;
 	for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
@@ -296,13 +300,13 @@ void process_image()
 {
 	build_applystack();
 
-	bitmap_to_float(gBitmapOrig);
+	bitmap_to_float(gBitmapOrig, gDevice);
 
 	Modifier *walker = gModifierApplyStack;
 	while (walker)
 	{
 		if (walker->mEnabled)
-			walker->process();
+			walker->process(gDevice);
 		walker = walker->mApplyNext;
 	}
 

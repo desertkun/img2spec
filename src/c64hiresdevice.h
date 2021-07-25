@@ -116,7 +116,7 @@ public:
 		int x, y, i, j;
 
 		// Find closest colors in the speccy palette
-		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
+		for (i = 0; i < mXRes * mYRes; i++)
 		{
 			gBitmapSpec[i] = rgb_to_c64_pal(gBitmapProc[i], 0, 16);
 		}
@@ -139,11 +139,11 @@ public:
 			cellht = 1;
 			break;
 		}
-		ymax = gDevice->mYRes / cellht;
+		ymax = mYRes / cellht;
 
 		for (y = 0; y < ymax; y++)
 		{
-			for (x = 0; x < (gDevice->mXRes / 8); x++)
+			for (x = 0; x < (mXRes / 8); x++)
 			{				
 				int counts[16];
 				for (i = 0; i < 16; i++)
@@ -154,7 +154,7 @@ public:
 				{
 					for (j = 0; j < 8; j++)
 					{
-						int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
+						int loc = (y * cellht + i) * mXRes + x * 8 + j;
 						int r = rgb_to_c64_pal(gBitmapProc[loc], 0, 16);
 						gBitmapSpec[loc] = r;
 						counts[r]++;
@@ -209,20 +209,20 @@ public:
 				{
 					for (j = 0; j < 8; j++)
 					{
-						int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
+						int loc = (y * cellht + i) * mXRes + x * 8 + j;
 						gBitmapSpec[loc] = pick_from_2_c64_cols(gBitmapProc[loc], col1, col2);
-						mBitmap[(y * cellht + i) * (gDevice->mXRes / 8) + x] <<= 1;
-						mBitmap[(y * cellht + i) * (gDevice->mXRes / 8) + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
+						mBitmap[(y * cellht + i) * (mXRes / 8) + x] <<= 1;
+						mBitmap[(y * cellht + i) * (mXRes / 8) + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
 					}
 				}
 
 				// Store the cell's attribute
-				mAttributes[y * (gDevice->mXRes / 8) + x] = (col2 & 0xf) | ((col1 & 0xf) << 4);
+				mAttributes[y * (mXRes / 8) + x] = (col2 & 0xf) | ((col1 & 0xf) << 4);
 			}
 		}
 
 		// Map color indices to palette
-		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
+		for (i = 0; i < mXRes * mYRes; i++)
 		{
 			gBitmapSpec[i] = gC64Palette[gBitmapSpec[i]] | 0xff000000;
 		}
@@ -231,15 +231,22 @@ public:
 	virtual void savescr(FILE * f)
 	{
 		int attrib_size_multiplier = 1 << (mOptCellSize);		
-		fwrite(mBitmap, (gDevice->mXRes / 8) * gDevice->mYRes, 1, f);
-		fwrite(mAttributes, (gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier, 1, f);
+		fwrite(mBitmap, (mXRes / 8) * mYRes, 1, f);
+		fwrite(mAttributes, (mXRes / 8) * (mYRes / 8) * attrib_size_multiplier, 1, f);
 	}
+
+    virtual void savefun(device_save_function_t cb)
+    {
+        int attrib_size_multiplier = 1 << (mOptCellSize);
+        cb(mBitmap, (mXRes / 8) * mYRes);
+        cb(mAttributes, (mXRes / 8) * (mYRes / 8) * attrib_size_multiplier);
+    }
 
 	virtual void saveh(FILE * f)
 	{		
 		int attrib_size_multiplier = 1 << (mOptCellSize);
 		int i, c = 0;
-		for (i = 0; i < (gDevice->mXRes / 8) * gDevice->mYRes; i++)
+		for (i = 0; i < (mXRes / 8) * mYRes; i++)
 		{
 			fprintf(f, "%3u,", mBitmap[i]);
 			c++;
@@ -251,9 +258,9 @@ public:
 		}
 		fprintf(f, "\n\n");
 		c = 0;
-		for (i = 0; i < (gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier; i++)
+		for (i = 0; i < (mXRes / 8) * (mYRes / 8) * attrib_size_multiplier; i++)
 		{
-			fprintf(f, "%3u%s", mAttributes[i], i != ((gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier) - 1 ? "," : "");
+			fprintf(f, "%3u%s", mAttributes[i], i != ((mXRes / 8) * (mYRes / 8) * attrib_size_multiplier) - 1 ? "," : "");
 			c++;
 			if (c >= 32)
 			{
@@ -267,12 +274,12 @@ public:
 	{		
 		int attrib_size_multiplier = 1 << (mOptCellSize);
 		int i;
-		for (i = 0; i < (gDevice->mYRes / 8) * gDevice->mYRes; i++)
+		for (i = 0; i < (mYRes / 8) * mYRes; i++)
 		{
 			fprintf(f, "\t.db #0x%02x\n", mBitmap[i]);
 		}
 		fprintf(f, "\n\n");
-		for (i = 0; i < (gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier; i++)
+		for (i = 0; i < (mXRes / 8) * (mYRes / 8) * attrib_size_multiplier; i++)
 		{
 			fprintf(f, "\t.db #0x%02x\n", mAttributes[i]);
 		}
@@ -299,28 +306,32 @@ public:
 		}
 
 		int i, j;
-		for (i = 0; i < gDevice->mYRes; i++)
+		for (i = 0; i < mYRes; i++)
 		{
-			for (j = 0; j < gDevice->mXRes; j++)
+			for (j = 0; j < mXRes; j++)
 			{
 				int fg, bg;
 
-				int attr = mAttributes[(i / cellht) * (gDevice->mXRes / 8) + j / 8];
+				int attr = mAttributes[(i / cellht) * (mXRes / 8) + j / 8];
 				fg = gC64Palette[((attr >> 0) & 0xf)] | 0xff000000;
 				bg = gC64Palette[((attr >> 4) & 0xf)] | 0xff000000;
 
-				gBitmapAttr[i * gDevice->mXRes + j] = (j % 8 < (((8 - cellht) / 2) + i % cellht)) ? fg : bg;
-				gBitmapBitm[i * gDevice->mXRes + j] = (mBitmap[(i)* (gDevice->mXRes / 8) + j / 8] & (1 << (7 - (j % 8)))) ? 0xffc0c0c0 : 0xff000000;
+				gBitmapAttr[i * mXRes + j] = (j % 8 < (((8 - cellht) / 2) + i % cellht)) ? fg : bg;
+				gBitmapBitm[i * mXRes + j] = (mBitmap[(i)* (mXRes / 8) + j / 8] & (1 << (7 - (j % 8)))) ? 0xffc0c0c0 : 0xff000000;
 			}
 		}
+
+#ifdef WITH_GUI
 		update_texture(gTextureAttr, gBitmapAttr);
 		update_texture(gTextureBitm, gBitmapBitm);
 
-		ImVec2 picsize((float)gDevice->mXRes, (float)gDevice->mYRes);
-		ImGui::Image((ImTextureID)gTextureAttr, picsize, ImVec2(0, 0), ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
-		ImGui::Image((ImTextureID)gTextureBitm, picsize, ImVec2(0, 0), ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f)); ImGui::SameLine(); ImGui::Text(" ");
+		ImVec2 picsize((float)mXRes, (float)mYRes);
+		ImGui::Image((ImTextureID)gTextureAttr, picsize, ImVec2(0, 0), ImVec2(mXRes / 1024.0f, mYRes / 512.0f)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
+		ImGui::Image((ImTextureID)gTextureBitm, picsize, ImVec2(0, 0), ImVec2(mXRes / 1024.0f, mYRes / 512.0f)); ImGui::SameLine(); ImGui::Text(" ");
+#endif
 	}
 
+#ifdef WITH_GUI
 	virtual void options()
 	{
 		if (ImGui::Combo("Attribute order", &mOptAttribOrder, "Make bitmap pretty\0Make bitmap compressable\0")) gDirty = 1;
@@ -368,18 +379,18 @@ public:
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1, 1));
 			int i, j;
 			int cellht = 8 >> mOptCellSize;
-			int ymax = (gDevice->mYRes / 8) << mOptCellSize;
+			int ymax = (mYRes / 8) << mOptCellSize;
 			for (i = 0; i < ymax; i++)
 			{
-				for (j = 0; j < (gDevice->mXRes / 8); j++)
+				for (j = 0; j < (mXRes / 8); j++)
 				{
 					ImGui::Image(
 						(ImTextureID)tex,
 						ImVec2(8.0f * gOptZoom, (float)cellht * gOptZoom),
-						ImVec2((8 / 1024.0f) * (j + 0), (cellht / (float)gDevice->mYRes) * (i + 0) * (gDevice->mYRes / 512.0f)),
-						ImVec2((8 / 1024.0f) * (j + 1), (cellht / (float)gDevice->mYRes) * (i + 1) * (gDevice->mYRes / 512.0f)));
+						ImVec2((8 / 1024.0f) * (j + 0), (cellht / (float)mYRes) * (i + 0) * (mYRes / 512.0f)),
+						ImVec2((8 / 1024.0f) * (j + 1), (cellht / (float)mYRes) * (i + 1) * (mYRes / 512.0f)));
 
-					if (j != (gDevice->mXRes / 8) - 1)
+					if (j != (mXRes / 8) - 1)
 					{
 						ImGui::SameLine();
 					}
@@ -391,12 +402,13 @@ public:
 		{
 			ImGui::Image(
 				(ImTextureID)tex,
-				ImVec2((float)gDevice->mXRes * gOptZoom,
-				(float)gDevice->mYRes * gOptZoom),
+				ImVec2((float)mXRes * gOptZoom,
+				(float)mYRes * gOptZoom),
 				ImVec2(0, 0),
-				ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f));
+				ImVec2(mXRes / 1024.0f, mYRes / 512.0f));
 		}
 	}
+#endif
 
 	virtual void writeOptions(JSON_Object *root)
 	{
@@ -424,7 +436,9 @@ public:
 		mXRes = mOptWidthCells * 8;
 		mYRes = mOptHeightCells * (8 >> mOptCellSize);
 
+#ifdef WITH_GUI
 		gDirty = 1;
 		gDirtyPic = 1;
+#endif
 	}
 };

@@ -45,6 +45,7 @@ public:
 		mRounded = false;
 	}
 
+#ifdef WITH_GUI
 	virtual int ui()
 	{
 		int ret = 0;
@@ -70,8 +71,9 @@ public:
 		ImGui::PopID();
 		return ret;
 	}
+#endif
 
-	int areahit(int i, int j, int x, int y)
+	int areahit(int i, int j, int x, int y, Device* gDevice)
 	{
 		if (mRounded)
 		{
@@ -95,7 +97,7 @@ public:
 		return 0;
 	}
 
-	virtual void process()
+	virtual void process(Device *gDevice)
 	{
 		int i, j;
 		float * buf = new float[gDevice->mYRes * gDevice->mXRes * 3];
@@ -115,7 +117,7 @@ public:
 					{
 						for (y = 0; y < mAreaY; y++)
 						{
-							if (areahit(i, j, x, y))
+							if (areahit(i, j, x, y, gDevice))
 							{
 								int ofs = ((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3;
 								assert(ofs >= 0 && ofs + 2 <= gDevice->mYRes * gDevice->mXRes * 3);
@@ -148,7 +150,7 @@ public:
 					{
 						for (y = 0; y < mAreaY; y++)
 						{
-							if (areahit(i, j, x, y))
+							if (areahit(i, j, x, y, gDevice))
 							{
 								int ofs = ((i + y - mAreaY / 2) * gDevice->mXRes + j + x - mAreaX / 2) * 3;
 								assert(ofs >= 0 && ofs + 2 <= gDevice->mYRes * gDevice->mXRes * 3);

@@ -23,6 +23,8 @@ public:
 	int common(int aRGBControls = 1)
 	{
 		int ret = 0;
+
+#ifdef WITH_GUI
 		if (ImGui::Checkbox("Enabled", &mEnabled)) { gDirty = 1; }
 		ImGui::SameLine();
 		if (ImGui::Button("Remove")) { gDirty = 1; ret = -1; }
@@ -35,6 +37,7 @@ public:
 			if (ImGui::Checkbox("Green enable", &mG_en)) { gDirty = 1; } ImGui::SameLine();
 			if (ImGui::Checkbox("Blue enable", &mB_en)) { gDirty = 1; }
 		}
+#endif
 
 		return ret;
 	}
@@ -51,13 +54,14 @@ public:
 		sprintf(plusstring, "+##%s", aName);
 		int modified = 0;
 
+#ifdef WITH_GUI
 		if (ImGui::SliderFloat(buttonstring, aValue, aX0, aX1)) { modified = 1; }	ImGui::SameLine();
 		if (ImGui::Button(minusstring) && *aValue - aNudge >= aX0) { modified = 1; *aValue -= aNudge; } ImGui::SameLine();
 		if (ImGui::Button(plusstring) && *aValue + aNudge <= aX1) { modified = 1; *aValue += aNudge; } ImGui::SameLine();
 		if (ImGui::Button(resetstring)) { modified = 1; *aValue = aReset; } ImGui::SameLine();
 		ImGui::Text(aName);
-
 		gDirty = gDirty | modified;
+#endif
 		
 		return modified;
 	}
@@ -74,6 +78,7 @@ public:
 		sprintf(plusstring, "+##%s", aName);
 		int modified = 0;
 
+#ifdef WITH_GUI
 		if (ImGui::SliderInt(buttonstring, aValue, aX0, aX1)) { modified = 1; }	ImGui::SameLine();
 		if (ImGui::Button(minusstring) && *aValue - aNudge >= aX0) { modified = 1; *aValue -= aNudge; } ImGui::SameLine();
 		if (ImGui::Button(plusstring) && *aValue + aNudge <= aX1) { modified = 1; *aValue += aNudge; } ImGui::SameLine();
@@ -82,11 +87,13 @@ public:
 		gDirty = gDirty | modified;
 
 		ImGui::Text(aName);
+#endif
 		return modified;
 	}
-
+#ifdef WITH_GUI
 	virtual int ui() = 0;
-	virtual void process() = 0;
+#endif
+	virtual void process(Device *gDevice) = 0;
 	virtual void serialize(JSON_Object *root) = 0;
 	virtual void deserialize(JSON_Object *root) = 0;
 

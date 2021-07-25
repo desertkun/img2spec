@@ -38,10 +38,13 @@ public:
 		mX = 0;
 		mY = 0;
 		mScale = 1;
+#ifdef WITH_GUI
 		gDirtyPic = 1;
+#endif
 		mOnce = 0;
 	}
 
+#ifdef WITH_GUI
 	virtual int ui()
 	{
 		int ret = 0;
@@ -73,10 +76,15 @@ public:
 		ImGui::PopID();
 		return ret;
 	}
+#endif
 
-	virtual void process()
+	virtual void process(Device *gDevice)
 	{
-		if (gDirtyPic && gSourceImageData)
+#ifdef WITH_GUI
+        if (gDirtyPic && gSourceImageData)
+#else
+        if (gSourceImageData)
+#endif
 		{
 			int i, j;
 			int h = (int)floor(gSourceImageY * mScale);
@@ -116,9 +124,10 @@ public:
 			}
 			delete[] temp;
 
+#ifdef WITH_GUI
 			update_texture(gTextureOrig, gBitmapOrig);
-
-			bitmap_to_float(gBitmapOrig);
+#endif
+			bitmap_to_float(gBitmapOrig, gDevice);
 		}
 	}
 

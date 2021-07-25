@@ -42,6 +42,7 @@ public:
 		mErrorClamp = 1;
 	}
 
+#ifdef WITH_GUI
 	virtual int ui()
 	{
 		int ret = 0;
@@ -75,8 +76,9 @@ public:
 		ImGui::PopID();
 		return ret;
 	}
+#endif
 
-	virtual void process()
+	virtual void process(Device *gDevice)
 	{
 		float *data = new float[gDevice->mXRes * gDevice->mYRes * 3];
 		memcpy(data, gBitmapProcFloat, sizeof(float) * gDevice->mXRes * gDevice->mYRes * 3);

@@ -33,6 +33,7 @@ public:
 		mOnce = 0;
 	}
 
+#ifdef WITH_GUI
 	virtual int ui()
 	{
 
@@ -58,8 +59,9 @@ public:
 
 		return ret;
 	}
+#endif
 
-	virtual void process()
+	virtual void process(Device *gDevice)
 	{
 		int c;
 		for (c = 0; c < gDevice->mXRes * gDevice->mYRes; c++)

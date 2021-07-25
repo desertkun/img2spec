@@ -41,6 +41,7 @@ public:
 		mAreaY = 3;
 	}
 
+#ifdef WITH_GUI
 	virtual int ui()
 	{
 		int ret = 0;
@@ -65,8 +66,9 @@ public:
 		ImGui::PopID();
 		return ret;
 	}
+#endif
 
-	virtual void process()
+	virtual void process(Device *gDevice)
 	{
 		int i, j, c;
 		float * buf = new float[gDevice->mYRes * gDevice->mXRes * 3 * 3];

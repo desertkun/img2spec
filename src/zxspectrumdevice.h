@@ -140,7 +140,7 @@ public:
 		{
 			for (j = 0; j < 8; j++)
 			{
-				int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
+				int loc = (y * cellht + i) * mXRes + x * 8 + j;
 				if (gBitmapSpec[loc] > 7)
 					brights++;
 				if (gBitmapSpec[loc] == 0)
@@ -165,7 +165,7 @@ public:
 		{
 			for (j = 0; j < 8; j++)
 			{
-				int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
+				int loc = (y * cellht + i) * mXRes + x * 8 + j;
 				int r = rgb_to_speccy_pal(gBitmapProc[loc], brights, 8);
 				gBitmapSpec[loc] = r;
 				counts[r]++;
@@ -218,7 +218,7 @@ public:
 		{
 			for (j = 0; j < 8; j++, c++)
 			{
-				int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
+				int loc = (y * cellht + i) * mXRes + x * 8 + j;
 
 				if (brightness[c] > pivot)
 				{
@@ -282,7 +282,7 @@ public:
 		col2 = res1;
 	}
 
-	static void calc_brightness(int brightness[8 * 8], int cellht, int x, int y, int &total)
+	void calc_brightness(int brightness[8 * 8], int cellht, int x, int y, int &total)
 	{
 		int i, j, c;
 		for (c = 0; c < 8 * 8; c++)
@@ -292,7 +292,7 @@ public:
 		{
 			for (j = 0; j < 8; j++, c++)
 			{
-				int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
+				int loc = (y * cellht + i) * mXRes + x * 8 + j;
 				// approximate brightness - b*1, r*3, g*5
 				brightness[c] += (((gBitmapProc[loc] >> 0) & 0xff) * 1) + (((gBitmapProc[loc] >> 8) & 0xff) * 5) + (((gBitmapProc[loc] >> 16) & 0xff) * 3);
 				total += brightness[c];
@@ -372,7 +372,7 @@ public:
 		int x, y, i, j;
 
 		// Find closest colors in the speccy palette
-		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
+		for (i = 0; i < mXRes * mYRes; i++)
 		{
 			gBitmapSpec[i] = rgb_to_speccy_pal(gBitmapProc[i], 0, 16);
 		}
@@ -395,11 +395,11 @@ public:
 			cellht = 1;
 			break;
 		}
-		ymax = gDevice->mYRes / cellht;
+		ymax = mYRes / cellht;
 
 		for (y = 0; y < ymax; y++)
 		{
-			for (x = 0; x < (gDevice->mXRes / 8); x++)
+			for (x = 0; x < (mXRes / 8); x++)
 			{
 				int col1 = 0, col2 = 0;
 				if (mOptConversionMode == 0)
@@ -443,14 +443,14 @@ public:
 				{
 					for (j = 0; j < 8; j++)
 					{
-						int loc = (y * cellht + i) * gDevice->mXRes + x * 8 + j;
+						int loc = (y * cellht + i) * mXRes + x * 8 + j;
 						gBitmapSpec[loc] = pick_from_2_speccy_cols(gBitmapProc[loc], col1, col2);
 						if (gBitmapSpec[loc] != col1)
 							livecount++;
-						mSpectrumBitmap[SPEC_Y(y * cellht + i) * (gDevice->mXRes / 8) + x] <<= 1;
-						mSpectrumBitmap[SPEC_Y(y * cellht + i) * (gDevice->mXRes / 8) + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
-						mSpectrumBitmapLinear[(y * cellht + i) * (gDevice->mXRes / 8) + x] <<= 1;
-						mSpectrumBitmapLinear[(y * cellht + i) * (gDevice->mXRes / 8) + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
+						mSpectrumBitmap[SPEC_Y(y * cellht + i) * (mXRes / 8) + x] <<= 1;
+						mSpectrumBitmap[SPEC_Y(y * cellht + i) * (mXRes / 8) + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
+						mSpectrumBitmapLinear[(y * cellht + i) * (mXRes / 8) + x] <<= 1;
+						mSpectrumBitmapLinear[(y * cellht + i) * (mXRes / 8) + x] |= (gBitmapSpec[loc] == col1 ? 0 : 1);
 					}
 				}
 
@@ -460,12 +460,12 @@ public:
 				}
 
 				// Store the cell's attribute
-				mSpectrumAttributes[y * (gDevice->mXRes / 8) + x] = (col2 & 0x7) | ((col1 & 7) << 3) | (((col1 & 8) != 0) << 6);
+				mSpectrumAttributes[y * (mXRes / 8) + x] = (col2 & 0x7) | ((col1 & 7) << 3) | (((col1 & 8) != 0) << 6);
 			}
 		}
 
 		// Map color indices to palette
-		for (i = 0; i < gDevice->mXRes * gDevice->mYRes; i++)
+		for (i = 0; i < mXRes * mYRes; i++)
 		{
 			gBitmapSpec[i] = gSpeccyPalette[gBitmapSpec[i]] | 0xff000000;
 		}
@@ -479,9 +479,22 @@ public:
 		{
 			bm = mSpectrumBitmapLinear;
 		}
-		fwrite(bm, (gDevice->mXRes / 8) * gDevice->mYRes, 1, f);
-		fwrite(mSpectrumAttributes, (gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier, 1, f);
+		fwrite(bm, (mXRes / 8) * mYRes, 1, f);
+		fwrite(mSpectrumAttributes, (mXRes / 8) * (mYRes / 8) * attrib_size_multiplier, 1, f);
 	}
+
+    virtual void savefun(device_save_function_t cb)
+    {
+        int attrib_size_multiplier = 1 << (mOptCellSize);
+        unsigned char *bm = mSpectrumBitmap;
+        if (mOptScreenOrder == 0)
+        {
+            bm = mSpectrumBitmapLinear;
+        }
+
+        cb(bm, (mXRes / 8) * mYRes);
+        cb(mSpectrumAttributes, (mXRes / 8) * (mYRes / 8) * attrib_size_multiplier);
+    }
 
 	virtual void saveh(FILE * f)
 	{
@@ -492,7 +505,7 @@ public:
 		}
 		int attrib_size_multiplier = 1 << (mOptCellSize);
 		int i, c = 0;
-		for (i = 0; i < (gDevice->mXRes / 8) * gDevice->mYRes; i++)
+		for (i = 0; i < (mXRes / 8) * mYRes; i++)
 		{
 			fprintf(f, "%3u,", bm[i]);
 			c++;
@@ -504,9 +517,9 @@ public:
 		}
 		fprintf(f, "\n\n");
 		c = 0;
-		for (i = 0; i < (gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier; i++)
+		for (i = 0; i < (mXRes / 8) * (mYRes / 8) * attrib_size_multiplier; i++)
 		{
-			fprintf(f, "%3u%s", mSpectrumAttributes[i], i != ((gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier) - 1 ? "," : "");
+			fprintf(f, "%3u%s", mSpectrumAttributes[i], i != ((mXRes / 8) * (mYRes / 8) * attrib_size_multiplier) - 1 ? "," : "");
 			c++;
 			if (c >= 32)
 			{
@@ -525,12 +538,12 @@ public:
 		}
 		int attrib_size_multiplier = 1 << (mOptCellSize);
 		int i;
-		for (i = 0; i < (gDevice->mYRes / 8) * gDevice->mYRes; i++)
+		for (i = 0; i < (mYRes / 8) * mYRes; i++)
 		{
 			fprintf(f, "\t.db #0x%02x\n", bm[i]);
 		}
 		fprintf(f, "\n\n");
-		for (i = 0; i < (gDevice->mXRes / 8) * (gDevice->mYRes / 8) * attrib_size_multiplier; i++)
+		for (i = 0; i < (mXRes / 8) * (mYRes / 8) * attrib_size_multiplier; i++)
 		{
 			fprintf(f, "\t.db #0x%02x\n", mSpectrumAttributes[i]);
 		}
@@ -557,28 +570,31 @@ public:
 		}
 
 		int i, j;
-		for (i = 0; i < gDevice->mYRes; i++)
+		for (i = 0; i < mYRes; i++)
 		{
-			for (j = 0; j < gDevice->mXRes; j++)
+			for (j = 0; j < mXRes; j++)
 			{
 				int fg, bg;
 
-				int attr = mSpectrumAttributes[(i / cellht) * (gDevice->mXRes / 8) + j / 8];
+				int attr = mSpectrumAttributes[(i / cellht) * (mXRes / 8) + j / 8];
 				fg = gSpeccyPalette[((attr >> 0) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
 				bg = gSpeccyPalette[((attr >> 3) & 7) | (((attr & 64)) >> 3)] | 0xff000000;
 
-				gBitmapAttr[i * gDevice->mXRes + j] = (j % 8 < (((8 - cellht) / 2) + i % cellht)) ? fg : bg;
-				gBitmapBitm[i * gDevice->mXRes + j] = (mSpectrumBitmapLinear[(i) * (gDevice->mXRes / 8) + j / 8] & (1 << (7 - (j % 8)))) ? 0xffc0c0c0 : 0xff000000;
+				gBitmapAttr[i * mXRes + j] = (j % 8 < (((8 - cellht) / 2) + i % cellht)) ? fg : bg;
+				gBitmapBitm[i * mXRes + j] = (mSpectrumBitmapLinear[(i) * (mXRes / 8) + j / 8] & (1 << (7 - (j % 8)))) ? 0xffc0c0c0 : 0xff000000;
 			}
 		}
+#ifdef WITH_GUI
 		update_texture(gTextureAttr, gBitmapAttr);
 		update_texture(gTextureBitm, gBitmapBitm);
 
-		ImVec2 picsize((float)gDevice->mXRes, (float)gDevice->mYRes);
-		ImGui::Image((ImTextureID)gTextureAttr, picsize, ImVec2(0, 0), ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
-		ImGui::Image((ImTextureID)gTextureBitm, picsize, ImVec2(0, 0), ImVec2(gDevice->mXRes / 1024.0f, gDevice->mYRes / 512.0f)); ImGui::SameLine(); ImGui::Text(" ");
+		ImVec2 picsize((float)mXRes, (float)mYRes);
+		ImGui::Image((ImTextureID)gTextureAttr, picsize, ImVec2(0, 0), ImVec2(mXRes / 1024.0f, mYRes / 512.0f)); ImGui::SameLine(); ImGui::Text(" "); ImGui::SameLine();
+		ImGui::Image((ImTextureID)gTextureBitm, picsize, ImVec2(0, 0), ImVec2(mXRes / 1024.0f, mYRes / 512.0f)); ImGui::SameLine(); ImGui::Text(" ");
+#endif
 	}
 
+#ifdef WITH_GUI
 	virtual void options()
 	{
 		if (ImGui::Combo("Attribute cell size", &mOptCellSize, "8x8 (standard)\08x4 (bicolor)\08x2\08x1\0")) { gDirty = 1; mOptHeightCells = mXRes / (8 >> mOptCellSize); mXRes = mOptHeightCells * (8 >> mOptCellSize); gDirtyPic = 1; }
@@ -594,7 +610,9 @@ public:
 		if (mOptConversionMode != 0)
 		if (ImGui::SliderFloat("Pivot bias", &mOptPivotBias, 0, 1)) { gDirty = 1; }
 	}
+#endif
 
+#ifdef WITH_GUI
 	virtual void zoomed(int aWhich)
 	{
 		int tex;
@@ -621,16 +639,16 @@ public:
 		}
 		int i, j;
 		int cellht = 8 >> mOptCellSize;
-		int ymax = (gDevice->mYRes / 8) << mOptCellSize;
+		int ymax = (mYRes / 8) << mOptCellSize;
 		for (i = 0; i < ymax; i++)
 		{
-			for (j = 0; j < (gDevice->mXRes / 8); j++)
+			for (j = 0; j < (mXRes / 8); j++)
 			{
 				ImGui::Image(
 					(ImTextureID)tex,
 					ImVec2(8.0f * gOptZoom, (float)cellht * gOptZoom),
-					ImVec2((8 / 1024.0f) * (j + 0), (cellht / (float)gDevice->mYRes) * (i + 0) * (gDevice->mYRes / 512.0f)),
-					ImVec2((8 / 1024.0f) * (j + 1), (cellht / (float)gDevice->mYRes) * (i + 1) * (gDevice->mYRes / 512.0f)));
+					ImVec2((8 / 1024.0f) * (j + 0), (cellht / (float)mYRes) * (i + 0) * (mYRes / 512.0f)),
+					ImVec2((8 / 1024.0f) * (j + 1), (cellht / (float)mYRes) * (i + 1) * (mYRes / 512.0f)));
 
 				if (ImGui::IsItemHovered())
 				{
@@ -639,7 +657,7 @@ public:
 					ImGui::EndTooltip();
 				}
 
-				if (j != (gDevice->mXRes / 8)-1)
+				if (j != (mXRes / 8)-1)
 				{
 					ImGui::SameLine();
 				}
@@ -647,6 +665,7 @@ public:
 		}
 		ImGui::PopStyleVar();
 	}
+#endif
 
 	virtual void writeOptions(JSON_Object *root)
 	{
@@ -684,7 +703,9 @@ public:
 		mXRes = mOptWidthCells * 8;
 		mYRes = mOptHeightCells * (8 >> mOptCellSize);
 
+#ifdef WITH_GUI
 		gDirty = 1;
 		gDirtyPic = 1;
+#endif
 	}
 };

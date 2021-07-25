@@ -48,6 +48,7 @@ public:
 		mOnce = 0;
 	}
 
+#ifdef WITH_GUI
 	virtual int ui()
 	{
 		int ret = 0;
@@ -72,8 +73,9 @@ public:
 		ImGui::PopID();
 		return ret;
 	}
+#endif
 
-	virtual void process()
+	virtual void process(Device *gDevice)
 	{
 		float point[MAX_LEVELS];
 		int i;
