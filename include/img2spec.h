@@ -4,7 +4,7 @@
 extern Device* img2spec_allocate_device(int deviceId);
 extern void img2spec_free_device(Device* device);
 extern uint8_t img2spec_load_workspace(const char *FileName, Device *gDevice);
-extern uint8_t img2spec_load_image(const char *FileName, Device *gDevice);
+extern uint8_t img2spec_load_image(const char *FileName, Device *gDevice, uint32_t& out_w, uint32_t& out_h);
 extern void img2spec_process_image(Device *gDevice);
 
 extern void img2spec_zx_spectrum_set_screen_order(Device *zx, int order);

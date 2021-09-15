@@ -115,7 +115,7 @@ char * mystrdup(char * aString)
     return data;
 }
 
-uint8_t img2spec_load_image(const char *FileName, Device *gDevice)
+uint8_t img2spec_load_image(const char *FileName, Device *gDevice, uint32_t& out_w, uint32_t& out_h)
 {
     FILE *f = fopen(FileName, "rb");
     if (!f)
@@ -140,6 +140,8 @@ uint8_t img2spec_load_image(const char *FileName, Device *gDevice)
         return 1;
     }
 
+    out_w = x;
+    out_h = y;
     gSourceImageX = x;
     gSourceImageY = y;
 
