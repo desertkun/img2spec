@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.7)
 project(Img2Spec)
 
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(IMG2SPEC_BUILD_EXE "Build the executable (requires SDL)" ON)
 option(IMG2SPEC_BUILD_STATIC "Build a static library" OFF)
